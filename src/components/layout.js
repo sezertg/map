@@ -44,7 +44,7 @@ export function createSidebar(){
 
     const sideMenu = createElement('nav', { class: 'side-menu' }, [
         createMenuList(menuItems),
-        createMenuList(settingsItems)
+        //createMenuList(settingsItems)
     ]);
 
     const sidebar = createElement('aside', { class: 'sidebar' }, [logoLink, sideMenu]);
@@ -84,4 +84,5 @@ export function createMain(){
 
     return main;
 }
+
 
