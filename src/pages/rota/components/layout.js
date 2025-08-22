@@ -119,7 +119,7 @@ export function createMain() {
         const fromCoord = fromInput.getAttribute('data-coordinate');
         const toCoord = toInput.getAttribute('data-coordinate');
         const waypointInputs = Array.from(waypointList.querySelectorAll('input.waypoint-input'));
-
+        passedStations = [];
 
         const waypointCoords = waypointInputs
             .map(i => ({
@@ -566,3 +566,4 @@ function loadGlobalsFromStorage() {
 window.addEventListener('DOMContentLoaded', () => {
   loadGlobalsFromStorage();
 });
+
