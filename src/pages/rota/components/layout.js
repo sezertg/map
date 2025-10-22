@@ -1,3 +1,8 @@
+// Copyright (c) 2025 Sezer Tığ
+// All rights reserved.
+// This file may not be reproduced, distributed, or transmitted
+// without the prior written permission of the author.
+
 import { createElement } from '../../../utils/dom.js';
 import { createMap, createRoute, onDistanceChanged, onStationsPassed } from '../../../components/map/map.js';
 import { setupAutoComplete } from './autocomplete.js';
@@ -566,4 +571,5 @@ function loadGlobalsFromStorage() {
 window.addEventListener('DOMContentLoaded', () => {
   loadGlobalsFromStorage();
 });
+
 
