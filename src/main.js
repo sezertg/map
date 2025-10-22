@@ -1,3 +1,8 @@
+// Copyright (c) 2025 Sezer Tığ
+// All rights reserved.
+// This file may not be reproduced, distributed, or transmitted
+// without the prior written permission of the author.
+
 import { createSidebar, createContent, createHeader, createMain } from './components/layout.js';
 import { setupThemeToggle, setupMenuToggle } from './core/events.js';
 import { renderContent } from './core/navigation.js';
@@ -29,3 +34,4 @@ function initApp() {
 }
 
 window.addEventListener("DOMContentLoaded", initApp);
+
