@@ -25,6 +25,8 @@ let maxBurnGlobal = 50;
 let minBurnGlobal = 1;
 let maxSpeedGlobal = 300;
 let minSpeedGlobal = 30;
+let rentCarGlobal = 95000;
+let workDayGlobal = 26;
 
 export function createMain() {  
     const cityList = extractSearchListWithCoordinates(locationData);
@@ -47,6 +49,8 @@ export function createMain() {
         vehicleSelect,
         speedInput,
         burnInput,
+        rentCarInput,
+        workDayInput,
         sidebar,
     } = createSidebar(cityList);
 
@@ -62,6 +66,7 @@ export function createMain() {
         burnText,
         totalStationText,
         totalFuelText,
+        dailyRentCarCostText,
         totalPriceText,
         routeBox,
         infoBoxContainer,
@@ -212,6 +217,16 @@ export function createMain() {
         updateAllBoxes(); 
     };
 
+    rentCarInput.onchange = () => {
+        rentCarGlobal = rentCarInput.value;
+        updateAllBoxes(); 
+    };
+
+    workDayInput.onchange = () => {
+        workDayGlobal = workDayInput.value;
+        updateAllBoxes(); 
+    };
+
     burnInput.onchange = () => {
 
         if (burnInput.value > maxBurnGlobal){
@@ -228,7 +243,7 @@ export function createMain() {
 
     function updateAllBoxes() {
         const waypoints = Array.from(waypointList.querySelectorAll('input.waypoint-input')).map(i => i.value.trim()).filter(v => v.length > 0);
-        updateInfoBox(stationsBox, fuelText, fromText, toText, distanceText, etaBreakText, etaText, vehicleText, speedText, routeBox, burnText, totalStationText, totalFuelText, totalPriceText, fuelPriceGlobal, fromInput.value, toInput.value, distance, vehicleSelect[vehicleValueGlobal-1], speedInput.value, burnInput.value, waypoints, passedStations);
+        updateInfoBox(stationsBox, fuelText, fromText, toText, distanceText, etaBreakText, etaText, vehicleText, speedText, routeBox, burnText, totalStationText, totalFuelText, dailyRentCarCostText, totalPriceText, fuelPriceGlobal, fromInput.value, toInput.value, distance, vehicleSelect[vehicleValueGlobal-1], speedInput.value, burnInput.value, waypoints, passedStations, rentCarInput.value, workDayInput.value);
         saveGlobalsToStorage();
     }
 
@@ -283,7 +298,15 @@ function createSidebar(cityList) {
     const burnInput = createElement('input', { type: 'number', value: fuelBurnGlobal, step: '1', min: minBurnGlobal, max: maxBurnGlobal  });
     const burnRow = createElement('div', { class: 'form-row' }, [burnLabel, burnInput]);
 
-    const sidebar = createElement('div', { class: 'map-sidebar' }, [title, fromRow, waypointList, toRow, addBtn, routesBtn, title2, vehicleRow, speedRow, burnRow]);
+    const rentCarLabel = createElement('label', {}, ['Aylık Kira:']);
+    const rentCarInput = createElement('input', { type: 'number', value: rentCarGlobal, step: '1000', min: 0, max: 250000  });
+    const rentCarRow = createElement('div', { class: 'form-row' }, [rentCarLabel, rentCarInput]);
+
+    const workDayLabel = createElement('label', {}, ['Çalışma Gün Sayısı(Aylık):']);
+    const workDayInput = createElement('input', { type: 'number', value: workDayGlobal, step: '1', min: 0, max: 30  });
+    const workDayRow = createElement('div', { class: 'form-row' }, [workDayLabel, workDayInput]);
+
+    const sidebar = createElement('div', { class: 'map-sidebar' }, [title, fromRow, waypointList, toRow, addBtn, routesBtn, title2, vehicleRow, speedRow, burnRow, rentCarRow, workDayRow]);
 
     return {
         fromInput,
@@ -294,6 +317,8 @@ function createSidebar(cityList) {
         vehicleSelect,
         speedInput,
         burnInput,
+        rentCarInput,
+        workDayInput,
         sidebar,
     };
 }
@@ -343,6 +368,10 @@ function createInfoBox(){
     const totalFuelIcon = createElement('i', { class: 'bx bxs-credit-card' });
     const totalFuelText = createElement('span', { class: 'burn-text' }, ['Yakıt Maliyeti: 0 ₺']);
     const totalFuelRow = createElement('div', { class: 'info-row' }, [totalFuelIcon, totalFuelText]);
+
+    const dailyRentCarCostIcon = createElement('i', { class: 'bx bxs-truck' });
+    const dailyRentCarCostText = createElement('span', { class: 'rentCar-text' }, ['Günlük Araç Kirası: 0 ₺']);
+    const dailyRentCarCostRow = createElement('div', { class: 'info-row' }, [dailyRentCarCostIcon, dailyRentCarCostText]);
     
     const totalPriceIcon = createElement('i', { class: 'bx bx-receipt' });
     const totalPriceText = createElement('span', { class: 'total-text' }, ['Toplam Maliyet: 0 ₺']);
@@ -353,7 +382,7 @@ function createInfoBox(){
     const routeBox = createElement('div', { class: 'info-box route-box' }, [fromRow, toRow, distanceRow, etaBreakRow,etaRow]);
     const vehicleBox = createElement('div', { class: 'info-box vehicle-box' }, [vehicleRow, speedRow, burnRow]);
     const stationsBox = createElement('div', { class: 'info-box stations-box' , id: 'station_prices' }, []);
-    const priceBox = createElement('div', { class: 'info-box price-box' }, [totalStationRow, totalFuelRow, totalPriceRow]);
+    const priceBox = createElement('div', { class: 'info-box price-box' }, [totalStationRow, totalFuelRow, dailyRentCarCostRow, totalPriceRow]);
 
     const infoBoxContainer = createElement('div', { class: 'info-box-container' }, [fuelBox, routeBox, vehicleBox, stationsBox, priceBox]);
 
@@ -369,6 +398,7 @@ function createInfoBox(){
         burnText,
         totalStationText,
         totalFuelText,
+        dailyRentCarCostText,
         totalPriceText,
         routeBox,
         infoBoxContainer,
@@ -428,15 +458,14 @@ function calculateBreaks(eta) {
 }
 
 // updateInfoBox fonksiyonu
-function updateInfoBox(stationsBox, fuelText, fromText, toText, distanceText, etaBreakText, etaText, vehicleText, speedText, routeBox, burnText, totalStationText, totalFuelText, totalPriceText, fuel, from, to, distance, vehicleType, speed, burn, waypoints, passedStations = [] ) {
+function updateInfoBox(stationsBox, fuelText, fromText, toText, distanceText, etaBreakText, etaText, vehicleText, speedText, routeBox, burnText, totalStationText, totalFuelText, dailyRentCarText, totalPriceText, fuel, from, to, distance, vehicleType, speed, burn, waypoints, passedStations = [], rentCar,workDay) {
   let eta = distance / speed; // Saat cinsinden tahmini sürüş süresi
-
     // İndirme süresi: her ara nokta için 2 saat
   let downloadingDuration = waypoints.length * 2; // saat
 
   // Mola sürelerini hesapla
   let breaks = calculateBreaks(eta + downloadingDuration);
-
+    console.log(downloadingDuration)
   // Toplam süre: sürüş + mola + indirme
   let totalDuration = eta + (breaks.totalBreakMinutes / 60) + downloadingDuration;
 
@@ -470,14 +499,29 @@ function updateInfoBox(stationsBox, fuelText, fromText, toText, distanceText, et
   });
 
   totalStationCost = totalStationCost / 1.2;
-  let totalPriceCost = totalFuelCost + totalStationCost;
+
+  let dailyRentCarConst = workDay == 0 ? 0 : rentCar / workDay;
+
+
+  let totalPriceCost = totalFuelCost + totalStationCost + dailyRentCarConst;
+
+  let yearsCareCost = 200000; // tır için 400.000 olacak
+  let monthCareCost = yearsCareCost / 12;
+  let tripCost = monthCareCost / 10;
+
+  //tır için 2000 yerine 3000 olacak
+  let totalCarePriceCost = totalPriceCost + tripCost + 2000 + (300 * (totalDuration - downloadingDuration)) + (downloadingDuration * 500); 
+  console.log(totalCarePriceCost);
+
+
 
   let totalFuelString = parseFloat(totalFuelCost.toFixed(0)).toLocaleString();
   let totalStationString = parseFloat(totalStationCost.toFixed(0)).toLocaleString();
   let totalPriceString = parseFloat(totalPriceCost.toFixed(0)).toLocaleString();
   let fuelString = parseFloat((fuel / 1.2).toFixed(2)).toLocaleString();
+  let dailyRentCarConstString = parseFloat(dailyRentCarConst.toFixed(0)).toLocaleString();
 
-  fuelText.textContent = `Yakıt Fiyatı: ${fuelString || 0} ₺ kdv'siz`;
+  fuelText.textContent = `Yakıt Fiyatı: ${fuelString || 0} ₺ + kdv`;
   fromText.textContent = `Çıkış Noktası: ${from || '-'}`;
   toText.textContent = `Varış Noktası: ${to || '-'}`;
   distanceText.textContent = `Mesafe: ${distance || 0} km`;
@@ -486,9 +530,10 @@ function updateInfoBox(stationsBox, fuelText, fromText, toText, distanceText, et
   vehicleText.textContent = `Araç Tipi: ${vehicleType.textContent}`;
   speedText.textContent = `Araç Hızı: ${speed} km/s`;
   burnText.textContent = `Yakıt Tüketimi: ${burn} lt/100km`;
-  totalFuelText.textContent = `Yakıt Maliyeti: ${totalFuelString || 0} ₺ kdv'siz`;
-  totalStationText.textContent = `Otoyol Maliyeti: ${totalStationString || 0} ₺ kdv'siz`;
-  totalPriceText.textContent = `Toplam Maliyet: ${totalPriceString || 0} ₺ kdv'siz`;
+  totalFuelText.textContent = `Yakıt Maliyeti: ${totalFuelString || 0} ₺ + kdv`;
+  totalStationText.textContent = `Otoyol Maliyeti: ${totalStationString || 0} ₺ + kdv`;
+  dailyRentCarText.textContent = `Günlük Araç Kirası: ${dailyRentCarConstString || 0} ₺ + kdv`;
+  totalPriceText.textContent = `Toplam Maliyet: ${totalPriceString || 0} ₺ + kdv`;
 
   // Waypoint (ara noktalar) listesini güncelle
   const oldWaypointRows = routeBox.querySelectorAll('.dynamic-row');
@@ -571,5 +616,3 @@ function loadGlobalsFromStorage() {
 window.addEventListener('DOMContentLoaded', () => {
   loadGlobalsFromStorage();
 });
-
-
